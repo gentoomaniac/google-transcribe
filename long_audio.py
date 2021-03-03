@@ -3,7 +3,7 @@ import sys
 
 import click
 
-from google.cloud import speech_v1
+from google.cloud import speech
 import io
 
 log = logging.getLogger(__file__)
@@ -20,17 +20,23 @@ def sample_long_running_recognize(file_path: str,
       file_path Path to audio file, e.g. /path/audio.wav or gcs://bucket/filename
     """
 
-    client = speech_v1.SpeechClient()
+    client = speech.SpeechClient()
     config = {"language_code": language_code, "sample_rate_hertz": sample_rate, "model": model}
 
     if not file_path.startswith('gs://'):
         with io.open(file_path, "rb") as f:
             content = f.read()
-            audio = {"content": content}
+        audio = speech.RecognitionAudio(content=content)
     else:
-        audio = {"uri": file_path}
+        audio = speech.RecognitionAudio(uri=file_path)
 
-    operation = client.long_running_recognize(config, audio)
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=sample_rate,
+        language_code=language_code,
+    )
+
+    operation = client.long_running_recognize(config=config, audio=audio)
 
     print(u"Waiting for operation to complete...")
     response = operation.result()
@@ -57,7 +63,7 @@ def _configure_logging(verbosity):
 @click.command()
 @click.option('-v', '--verbosity', help='Verbosity', default=0, count=True)
 @click.option('-l', '--language-code', help='langauge code', default="en-US")
-@click.option('-m', '-ml-model', help='ml model to use', default="video")
+@click.option('-m', '--ml-model', help='ml model to use', default="video")
 @click.option('-s', '--sample-rate', help='sample rate', default=16000)
 @click.argument('filename', type=str)
 @click.argument('transcript-path', type=str)
