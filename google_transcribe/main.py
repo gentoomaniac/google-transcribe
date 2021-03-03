@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 
@@ -34,21 +35,27 @@ def sample_long_running_recognize(file_path: str,
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=sample_rate,
         language_code=language_code,
+        enable_word_time_offsets=True,
     )
 
     operation = client.long_running_recognize(config=config, audio=audio)
-
-    print(u"Waiting for operation to complete...")
     response = operation.result()
 
-    results = []
+    transcript = []
     for result in response.results:
-        # First alternative is the most probable result
         alternative = result.alternatives[0]
-        print(u"Transcript: {}".format(alternative.transcript))
-        results.append(alternative.transcript)
 
-    return results
+        data = {'transcript': alternative.transcript, 'confidence': alternative.confidence, 'words': []}
+        for word in alternative.words:
+            data['words'].append({
+                "word": word.word,
+                "start_time": word.start_time.total_seconds(),
+                "end_time": word.end_time.total_seconds()
+            })
+
+        transcript.append(data)
+
+    return transcript
 
 
 def _configure_logging(verbosity):
@@ -66,7 +73,7 @@ def _configure_logging(verbosity):
 @click.option('-m', '--ml-model', help='ml model to use', default="video")
 @click.option('-s', '--sample-rate', help='sample rate', default=16000)
 @click.argument('filename', type=str)
-@click.argument('transcript-path', type=str)
+@click.argument('transcript-path', type=str, required=False)
 def cli(verbosity: int, language_code: str, ml_model: str, sample_rate: int, filename: str, transcript_path: str):
     """ main program
     """
@@ -78,9 +85,12 @@ def cli(verbosity: int, language_code: str, ml_model: str, sample_rate: int, fil
                                                model=ml_model,
                                                sample_rate=sample_rate,
                                                language_code=language_code)
-    log.debug(transcript)
-    with open(transcript_path, 'w') as f:
-        f.write('\n'.join(transcript))
+
+    if transcript_path:
+        with open(transcript_path, 'w') as f:
+            json.dump(transcript, fp=f)
+    else:
+        print(json.dumps(transcript))
 
     return 0
 
