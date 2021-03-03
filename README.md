@@ -37,11 +37,28 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentialfile.json
 Audio files need to be in uncompressed WAV and have to be *mono*
 
 ``` bash
-ffmpeg -i stereo.wav -ac 1 mono.wav
+ffmpeg -i stereo.m4a -ac 1 mono.wav
+```
+
+Upload the file either via webui or using gsutil
+
+```bash
+gsutil cp mono.wav gs://my-bucket/
 ```
 
 ### Run
 
 ```bash
-google-transcribe -l sv-SE -s 44100 gs://my-bucket/short.wav ./transcript.txt
+google-transcribe -l sv-SE -s 44100 gs://my-bucket/mono.wav ./transcript.txt
 ```
+
+## Known problems:
+
+### Quotas
+
+```bash
+google.api_core.exceptions.ResourceExhausted: 429 Resource has been exhausted (e.g. check quota).
+```
+
+The default quota for audio minutes per day is 3600 seconds or one hour.
+If you run into this, go to `Cloud Speech-to-Text API` > `Quotas` and adjust as necessary.
