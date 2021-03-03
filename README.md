@@ -52,7 +52,16 @@ gsutil cp mono.wav gs://my-bucket/
 google-transcribe -l sv-SE -s 44100 gs://my-bucket/mono.wav ./transcript.txt
 ```
 
-## Known problems:
+### Output
+
+The output is json formated to include single word timings and confidence.
+To get a simple text output you can use the tool [jq](https://stedolan.github.io/jq/)
+
+```bash
+jq '.[].transcript' <transcript.json
+```
+
+## Known problems
 
 ### Quotas
 
