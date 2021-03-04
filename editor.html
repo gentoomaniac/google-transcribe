@@ -1,0 +1,100 @@
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    </head>
+
+    <body>
+
+        <p>
+            <button id="play">Play</button>
+            <button id="stop">Stop</button>
+        </p>
+
+        <p><div id="currentTime"></div></p>
+
+        <p>
+            <div style="border: dotted 1px black; overflow: hidden; width: 500px; clear: both;">
+                <div id="prev_words" style="width: 200px; float: left; text-align: right;"></div>
+                <div id="next_words" style="width: 200px; float: right;text-align: left;"></div>
+                <div id="current_word" style="font-weight: bold; width: 100px; overflow: hidden;text-align: center;"></div>
+            </div>
+        </p>
+        <p><div id="transcript"></div></p>
+
+        <script>
+
+            const sound = new Audio();
+            var test_data;
+
+
+            $('#play').click(playSound);
+            $('#stop').click(stop);
+
+            $.getJSON("/short.json", function(json) {
+                console.log(json); // this will show the info it in firebug console
+                test_data = json;
+            });
+
+            var lineIndex = 0;
+            var wordIndex = 0;
+
+            function updateTranscript() {
+                if (lineIndex+1 < test_data.transcript.length) {
+                    if (test_data.transcript[lineIndex +1].start_time <= sound.currentTime)
+                        lineIndex++;
+
+                    if (test_data.transcript[lineIndex].start_time < sound.currentTime)
+                        $("#transcript").html(test_data.transcript[lineIndex].text);
+                }
+
+            }
+            function updateWord() {
+                if (wordIndex+1 < test_data.words.length) {
+                    if (test_data.words[wordIndex + 1].start_time <= sound.currentTime)
+                        wordIndex++;
+
+                    if (test_data.words[wordIndex].start_time < sound.currentTime) {
+                        prevFirstIndex = (wordIndex - 3 < 0) ? 0 : wordIndex - 3;
+                        prevLastIndex = (wordIndex - 1 < 0) ? 0 : wordIndex - 1;
+                        nextFirstIndex = (wordIndex + 1 < test_data.words.length) ? wordIndex + 1 : test_data.words.length-1;
+                        nextLastIndex = (wordIndex + 4 < test_data.words.length) ? wordIndex + 4 : test_data.words.length-1;
+
+                        const prev_words = test_data.words.slice(prevFirstIndex, wordIndex).map(w => w.word);
+                        const next_words = test_data.words.slice(nextFirstIndex, nextLastIndex).map(w => w.word);
+
+                        $("#prev_words").html(prev_words.join(" "));
+                        $("#current_word").html(test_data.words[wordIndex].word);
+                        $("#next_words").html(next_words.join(" "));
+                    }
+                }
+            }
+
+            function playSound() {
+            if (sound.currentSrc == "") {
+                sound.src = '/short.wav';
+                sound.ontimeupdate = function(){
+                    document.querySelector('#currentTime').innerHTML = sound.currentTime;
+                    updateWord();
+                    updateTranscript();
+                };
+            }
+
+            if (sound.paused) {
+                sound.play();
+                document.querySelector('#play').innerHTML = "Pause";
+            } else {
+                sound.pause();
+                document.querySelector('#play').innerHTML = "Play";
+            }
+            }
+
+            function stop() {
+                sound.pause()
+                sound.currentTime = 0;
+            }
+
+        </script>
+
+    </body>
+
+</html>

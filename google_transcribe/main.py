@@ -41,20 +41,28 @@ def sample_long_running_recognize(file_path: str,
     operation = client.long_running_recognize(config=config, audio=audio)
     response = operation.result()
 
-    transcript = []
+    transcript = {'transcript': [], 'words': []}
+    words = []
     for result in response.results:
         alternative = result.alternatives[0]
 
-        data = {'transcript': alternative.transcript, 'confidence': alternative.confidence, 'words': []}
+        start_time = alternative.words[0].start_time.total_seconds()
+        end_time = alternative.words[-1].end_time.total_seconds()
+        transcript["transcript"].append({
+            'text': alternative.transcript,
+            'confidence': alternative.confidence,
+            'start_time': start_time,
+            'end_time': end_time
+        })
+
         for word in alternative.words:
-            data['words'].append({
-                "word": word.word,
-                "start_time": word.start_time.total_seconds(),
-                "end_time": word.end_time.total_seconds()
+            words.append({
+                'word': word.word,
+                'start_time': word.start_time.total_seconds(),
+                'end_time': word.end_time.total_seconds()
             })
 
-        transcript.append(data)
-
+    transcript['words'] = words
     return transcript
 
 
