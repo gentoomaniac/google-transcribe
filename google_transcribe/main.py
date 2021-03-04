@@ -51,16 +51,14 @@ def sample_long_running_recognize(file_path: str,
         transcript["transcript"].append({
             'text': alternative.transcript,
             'confidence': alternative.confidence,
+            'start_word': len(words) - 1,
+            'end_word': len(words) - 1 + len(alternative.words),
             'start_time': start_time,
             'end_time': end_time
         })
 
         for word in alternative.words:
-            words.append({
-                'word': word.word,
-                'start_time': word.start_time.total_seconds(),
-                'end_time': word.end_time.total_seconds()
-            })
+            words.append([word.word, word.start_time.total_seconds(), word.end_time.total_seconds()])
 
     transcript['words'] = words
     return transcript

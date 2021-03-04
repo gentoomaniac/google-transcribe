@@ -1,0 +1,13 @@
+div.container {
+  width: 80%;
+  align-self: center;
+  padding-top: 20px;
+}
+
+div#player-jumbo {
+  text-align: center;
+}
+
+div.player {
+  align-self: center;
+}
