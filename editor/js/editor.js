@@ -2,7 +2,7 @@ const WORD = 0;
 const START_TIME = 1;
 const END_TIME = 2;
 
-var sound = $('#my-audio');
+var sound = $('#player');
 
 var test_data;
 
@@ -18,7 +18,7 @@ $(document).ready(function(){
             test_data = json;
             showTranscript();
         });
-        sound.prop("src", "/" + this.value + ".m4a");
+        sound.prop("src", "/" + this.value + ".mp3");
     });
 
     $('#add_word').click(addWord);
@@ -41,22 +41,18 @@ $(document).ready(function(){
 
 function updateWord(currentTime) {
     // remove all but last word highlights
-    lastWords.slice(lastWords.length - 1).forEach(function(val) {
-        $('#w_'+val).removeClass('badge-success');
-        $('#w_'+val).addClass('badge-secondary');
+    if (lastWords.length > 5) {
+        $('#w_'+lastWords[0]).removeClass('badge-success');
+        $('#w_'+lastWords[0]).addClass('badge-secondary');
         lastWords.shift();
-    });
+    }
 
     var index = getWordIndexByTime(currentTime)[0];
-    // remove last word highlight if we have a new word
-    if (typeof lastWords[0] != "undefined" && index != lastWords[0]) {
-        $('#w_'+index).removeClass('badge-success');
-        $('#w_'+index).addClass('badge-secondary');
+    if (index != lastWords[lastWords.length-1]){
+        $('#w_'+index).removeClass('badge-secondary');
+        $('#w_'+index).addClass('badge-success');
+        lastWords.push(index);
     }
-    console.log(index)
-    $('#w_'+index).removeClass('badge-secondary');
-    $('#w_'+index).addClass('badge-success');
-    lastWords.push(index);
 }
 
 

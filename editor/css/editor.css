@@ -31,3 +31,7 @@ div#editWord {
 input#current-time {
   width: 100%;
 }
+
+#player {
+  width: 100%;
+}
