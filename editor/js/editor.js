@@ -75,8 +75,8 @@ function editClose() {
 function saveWord() {
     var lastIndex = lastWords.length-1;
     test_data.words[lastWords[lastIndex]][WORD] = $('#word').val();
-    test_data.words[lastWord[lastIndex]][START_TIME] = $('#start-time').val();
-    test_data.words[lastWord[lastIndex]][END_TIME] = $('#end-time').val();
+    test_data.words[lastWords[lastIndex]][START_TIME] = $('#start-time').val();
+    test_data.words[lastWords[lastIndex]][END_TIME] = $('#end-time').val();
     $('.edit-word').hide();
     var wordId = $('#word-id').val();
     $('#w_'+wordId).text(test_data.words[lastWords[lastIndex]][WORD])
@@ -91,14 +91,14 @@ function addWord() {
 }
 
 
-function gentranscriptHTML() {
+function genTranscriptHTML() {
     var html = [];
     test_data.transcript.forEach(function(line){
         words = test_data.words.slice(line.start_word, line.end_word+1)
 
         var row = [];
         words.forEach(function(val, index){
-            row.push("<span id=\"w_" + (line.start_word+index) + "\" class=\"badge badge-secondary\" onClick=\"editShow(" + (line.start_word+index) + ")\">" + val[WORD] + "</span>");
+            row.push('<span id="w_' + (line.start_word+index) + '" class="badge badge-secondary" onClick="editShow(' + (line.start_word+index) + ')\">' + val[WORD] + '</span>');
         });
         html.push(row);
     });
@@ -106,11 +106,11 @@ function gentranscriptHTML() {
 }
 
 function showTranscript() {
-    var html = gentranscriptHTML();
+    var html = genTranscriptHTML();
 
     var innerHTML = "";
-    html.forEach(function(val) {
-        innerHTML = innerHTML + '<p>' + val.join(' ') + '</p>';
+    html.forEach(function(val, index) {
+        innerHTML = innerHTML + '<p id="row_' + index + '">' + val.join(' ') + '</p>';
     });
     $('#transcript').html(innerHTML);
 }
