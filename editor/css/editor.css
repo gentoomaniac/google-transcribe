@@ -1,3 +1,7 @@
+.body {
+  position: relative;
+}
+
 div.container {
   width: 80%;
   align-self: center;
@@ -10,4 +14,13 @@ div#player-jumbo {
 
 div.player {
   align-self: center;
+}
+
+div#edit-word {
+  position: absolute;
+  max-width: 800px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
 }

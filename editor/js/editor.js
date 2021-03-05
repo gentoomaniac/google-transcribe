@@ -39,10 +39,10 @@ function updateWord() {
             nextFirstIndex = (wordIndex + 1 < test_data.words.length) ? wordIndex + 1 : test_data.words.length-1;
             nextLastIndex = (wordIndex + 4 < test_data.words.length) ? wordIndex + 4 : test_data.words.length-1;
 
-            const prevWords = test_data.words.slice(prevFirstIndex, wordIndex).map(w => w[WORD]);
-            const nextWords = test_data.words.slice(nextFirstIndex, nextLastIndex).map(w => w[WORD]);
+            const prevWords = test_data.words.slice(prevFirstIndex, wordIndex).map(w => "<span class=\"badge badge-secondary\">" + w[WORD] + "</span>");
+            const nextWords = test_data.words.slice(nextFirstIndex, nextLastIndex).map(w => "<span class=\"badge badge-secondary\">" + w[WORD] + "</span>");
 
-            currentHighlight = " <font style=\"font-weight: bold;\" onClick=edit()>" + test_data.words[wordIndex][WORD] + "</font> ";
+            currentHighlight = " <span class=\"badge badge-success\" word-index=\"" + wordIndex + "\" onClick=editShow()>" + test_data.words[wordIndex][WORD] + "</span> ";
             $("#current_words").html(prevWords.join(" ") + currentHighlight + nextWords.join(" "));
         }
     }
@@ -52,12 +52,25 @@ function updateProgressBar() {
     var playedPercent = Math.round(sound.currentTime/sound.duration * 100);
     if (playedPercent < 1)
         playedPercent = 1;
-    $('#progressbar').css('width', playedPercent+'%').attr("aria-valuenow", playedPercent);
+    $('#progressbar').css('width', playedPercent+'%').attr("aria-valuenow", playedPercent).text(Math.round(sound.currentTime*100)/100 + "s");
 }
 
-function edit() {
-    var newWord = window.prompt("edit word:", test_data.words[wordIndex].word);
-    test_data.words[wordIndex].word = newWord;
+function editShow() {
+    $('#word').val(test_data.words[wordIndex][WORD]);
+    $('#start-time').val(test_data.words[wordIndex][START_TIME]);
+    $('#end-time').val(test_data.words[wordIndex][END_TIME]);
+    $('.edit-word').show();
+}
+
+function editClose() {
+    $('.edit-word').hide();
+}
+
+function saveWord() {
+    test_data.words[wordIndex][WORD] = $('#word').val();
+    test_data.words[wordIndex][START_TIME] = $('#start-time').val();
+    test_data.words[wordIndex][END_TIME] = $('#end-time').val();
+    $('.edit-word').hide();
     updateWord();
 }
 
@@ -71,7 +84,7 @@ function playSound() {
 if (sound.currentSrc == "") {
     sound.src = '/short.wav';
     sound.ontimeupdate = function(){
-        $('#timeInput').val(sound.currentTime);
+        //$('#timeInput').val(sound.currentTime);
         updateWord();
         updateTranscript();
         updateProgressBar();
