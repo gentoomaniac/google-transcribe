@@ -2,21 +2,26 @@ const WORD = 0;
 const START_TIME = 1;
 const END_TIME = 2;
 
-var sound;
+var sound = $('#my-audio');
 
 var test_data;
 
 var lineIndex = 0;
 var lastWords = [];
 
+var transcriptFile;
+
 $(document).ready(function(){
-    $.getJSON("/short.json", function(json) {
-        test_data = json;
-        showTranscript();
+    $("#files").on("change", function(){
+        console.log(this.value + ".json")
+        $.getJSON("/" + this.value + ".json", function(json) {
+            test_data = json;
+            showTranscript();
+        });
+        sound.prop("src", "/" + this.value + ".m4a");
     });
 
     $('#add_word').click(addWord);
-    sound = $('#my-audio');
     sound.on("timeupdate", function(){
         updateWord(sound.prop("currentTime"));
     });

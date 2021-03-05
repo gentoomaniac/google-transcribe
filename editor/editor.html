@@ -9,9 +9,14 @@
         <div class="container">
             <div class="jumbotron" id="player-jumbo">
                 <p>
-                    <audio id="my-audio" preload="metadata" controls>
-                        <source src="/short.mp3" type="audio/mp3">
-                    </audio>
+                    <select name="files" id="files">
+                        <option value="" default></option>
+                        <option value="audio_only">audio_only</option>
+                        <option value="short">short</option>
+                    </select>
+                </p>
+                <p>
+                    <audio id="my-audio" preload="metadata" controls></audio>
                 </p>
                 <p><div id="transcript"></div></p>
             </div>
@@ -22,7 +27,7 @@
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Modal title</h5>
+                  <h5 class="modal-title">Edit word</h5>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="editClose()">
                     <span aria-hidden="true">&times;</span>
                   </button>
