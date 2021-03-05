@@ -7,9 +7,11 @@
     </head>
 
     <body>
-        <div class="container">
-            <div class="jumbotron" id="player-jumbo">
-                <p>
+        <div id="side-menue" class="card text-white bg-secondary mb-3" style="max-width: 20rem;">
+            <div class="card-header">Menue</div>
+            <div class="card-body">
+                <h5 class="card-title">Load</h5>
+                <p class="card-text">
                     <select name="files" id="files">
                         <option value="" default></option>
                         <option value="audio_only">audio_only</option>
@@ -18,6 +20,16 @@
                         <option value="short">short</option>
                     </select>
                 </p>
+                <h5 class="card-title">Export</h5>
+                <p class="card-text">
+                    <button type="button" id="export-json" class="btn btn-primary btn-sm" onclick="exportJson()">{json}</button>
+                    <button type="button" id="eport-transcript" class="btn btn-primary btn-sm" onclick="exportTranscript()">transcript</button>
+                </p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="jumbotron" id="player-jumbo">
                 <p>
                     <audio id="player" preload="metadata" controls></audio>
                 </p>

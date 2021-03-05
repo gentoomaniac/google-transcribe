@@ -7,7 +7,7 @@ var sound = $('#player');
 var test_data;
 
 var lineIndex = 0;
-var lastWords = [];
+var lastWord = 0;
 
 var transcriptFile;
 
@@ -31,7 +31,7 @@ $(document).ready(function(){
         if (!isPaused)
             sound.trigger("pause");
 
-        lastWords.push(getWordIndexByTime(sound.prop("currentTime"))[0]);
+        lastWord = getWordIndexByTime(sound.prop("currentTime"))[0];
         updateWord();
 
         if (!isPaused)
@@ -40,18 +40,11 @@ $(document).ready(function(){
 });
 
 function updateWord(currentTime) {
-    // remove all but last word highlights
-    if (lastWords.length > 5) {
-        $('#w_'+lastWords[0]).removeClass('badge-success');
-        $('#w_'+lastWords[0]).addClass('badge-secondary');
-        lastWords.shift();
-    }
-
     var index = getWordIndexByTime(currentTime)[0];
-    if (index != lastWords[lastWords.length-1]){
+    if (index != lastWord){
         $('#w_'+index).removeClass('badge-secondary');
         $('#w_'+index).addClass('badge-success');
-        lastWords.push(index);
+        lastWord = index;
     }
 }
 
@@ -120,4 +113,21 @@ function getWordIndexByTime(currentTime) {
     });
 
     return result
+}
+
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
+function exportJson() {
+    download("transcript.json", JSON.stringify(test_data))
 }

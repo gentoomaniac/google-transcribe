@@ -12,13 +12,6 @@ div#player-jumbo {
   text-align: center;
 }
 
-div#player {
-  width: 800px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, 0%);
-}
-
 div#editWord {
   position: absolute;
   max-width: 800px;
@@ -33,5 +26,18 @@ input#current-time {
 }
 
 #player {
+  width: 100%;
+}
+
+#side-menue {
+  width: 200px;
+  position: fixed;
+  z-index: 1;
+  opacity: 80%;
+  top: 10px;
+  left: 10px;
+}
+
+#files {
   width: 100%;
 }
