@@ -52,7 +52,7 @@ def sample_long_running_recognize(file_path: str,
             'text': alternative.transcript,
             'confidence': alternative.confidence,
             'start_word': len(words),
-            'end_word': len(words) + len(alternative.words),
+            'end_word': (len(words) - 1) + len(alternative.words),
             'start_time': start_time,
             'end_time': end_time
         })

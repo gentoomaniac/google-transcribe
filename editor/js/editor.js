@@ -7,11 +7,10 @@ var sound;
 var test_data;
 
 var lineIndex = 0;
-var wordIndex = 0;
+var lastWords = [];
 
 $(document).ready(function(){
     $.getJSON("/short.json", function(json) {
-        console.log(json); // this will show the info it in firebug console
         test_data = json;
         showTranscript();
     });
@@ -22,25 +21,37 @@ $(document).ready(function(){
         updateWord(sound.prop("currentTime"));
     });
     sound.on("seeked", function(){
-        var indexes = getWordIndexByTime(sound.prop("currentTime"));
-        console.log(indexes);
-        wordIndex = indexes[0];
+        var isPaused = sound.prop('paused');
+
+        if (!isPaused)
+            sound.trigger("pause");
+
+        lastWords.push(getWordIndexByTime(sound.prop("currentTime"))[0]);
+        updateWord();
+
+        if (!isPaused)
+            sound.trigger("play");
     });
 });
 
 function updateWord(currentTime) {
-    if (wordIndex+1 < test_data.words.length) {
-        if (test_data.words[wordIndex + 1][START_TIME] <= currentTime)
-            wordIndex++;
+    // remove all but last word highlights
+    lastWords.slice(lastWords.length - 1).forEach(function(val) {
+        $('#w_'+val).removeClass('badge-success');
+        $('#w_'+val).addClass('badge-secondary');
+        lastWords.shift();
+    });
 
-        var highlights = getWordIndexByTime(currentTime);
-        $('#w_'+wordIndex).removeClass('badge-secondary');
-        $('#w_'+wordIndex).addClass('badge-success');
-        if (wordIndex>0) {
-            $('#w_'+(wordIndex-1)).removeClass('badge-success');
-            $('#w_'+(wordIndex-1)).addClass('badge-secondary');
-            }
+    var index = getWordIndexByTime(currentTime)[0];
+    // remove last word highlight if we have a new word
+    if (typeof lastWords[0] != "undefined" && index != lastWords[0]) {
+        $('#w_'+index).removeClass('badge-success');
+        $('#w_'+index).addClass('badge-secondary');
     }
+    console.log(index)
+    $('#w_'+index).removeClass('badge-secondary');
+    $('#w_'+index).addClass('badge-success');
+    lastWords.push(index);
 }
 
 
@@ -57,19 +68,20 @@ function editClose() {
 }
 
 function saveWord() {
-    test_data.words[wordIndex][WORD] = $('#word').val();
-    test_data.words[wordIndex][START_TIME] = $('#start-time').val();
-    test_data.words[wordIndex][END_TIME] = $('#end-time').val();
+    var lastIndex = lastWords.length-1;
+    test_data.words[lastWords[lastIndex]][WORD] = $('#word').val();
+    test_data.words[lastWord[lastIndex]][START_TIME] = $('#start-time').val();
+    test_data.words[lastWord[lastIndex]][END_TIME] = $('#end-time').val();
     $('.edit-word').hide();
     var wordId = $('#word-id').val();
-    $('#w_'+wordId).text(test_data.words[wordIndex][WORD])
+    $('#w_'+wordId).text(test_data.words[lastWords[lastIndex]][WORD])
     updateWord();
 
 }
 
 function addWord() {
     var newWord = window.prompt("add new word:", "");
-    test_data.words.splice(wordIndex+1, 0, {'word': newWord, 'start_time': sound.currentTime, 'end_time': null});
+    test_data.words.splice(lastWord+1, 0, {'word': newWord, 'start_time': sound.currentTime, 'end_time': null});
     updateWord();
 }
 
@@ -81,7 +93,7 @@ function gentranscriptHTML() {
 
         var row = [];
         words.forEach(function(val, index){
-            row.push("<span id=\"w_" + index + "\" class=\"badge badge-secondary\" onClick=\"editShow(" + index + ")\">" + val[WORD] + "</span>");
+            row.push("<span id=\"w_" + (line.start_word+index) + "\" class=\"badge badge-secondary\" onClick=\"editShow(" + (line.start_word+index) + ")\">" + val[WORD] + "</span>");
         });
         html.push(row);
     });
