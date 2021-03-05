@@ -2,14 +2,12 @@ const WORD = 0;
 const START_TIME = 1;
 const END_TIME = 2;
 
-const sound = new Audio();
+var sound;
+
 var test_data;
 
-
-$('#play').click(playSound);
-$('#stop').click(stop);
-$('#add_word').click(addWord);
-
+var lineIndex = 0;
+var wordIndex = 0;
 
 $(document).ready(function(){
     $.getJSON("/short.json", function(json) {
@@ -17,17 +15,25 @@ $(document).ready(function(){
         test_data = json;
         showTranscript();
     });
+
+    $('#add_word').click(addWord);
+    sound = $('#my-audio');
+    sound.on("timeupdate", function(){
+        updateWord(sound.prop("currentTime"));
+    });
+    sound.on("seeked", function(){
+        var indexes = getWordIndexByTime(sound.prop("currentTime"));
+        console.log(indexes);
+        wordIndex = indexes[0];
+    });
 });
 
-var lineIndex = 0;
-var wordIndex = 0;
-
-function updateWord() {
+function updateWord(currentTime) {
     if (wordIndex+1 < test_data.words.length) {
-        if (test_data.words[wordIndex + 1][START_TIME] <= sound.currentTime)
+        if (test_data.words[wordIndex + 1][START_TIME] <= currentTime)
             wordIndex++;
 
-        var highlights = getWordIndexByTime(sound.currentTime);
+        var highlights = getWordIndexByTime(currentTime);
         $('#w_'+wordIndex).removeClass('badge-secondary');
         $('#w_'+wordIndex).addClass('badge-success');
         if (wordIndex>0) {
@@ -37,12 +43,6 @@ function updateWord() {
     }
 }
 
-function updateProgressBar() {
-    var playedPercent = Math.round(sound.currentTime/sound.duration * 100);
-    if (playedPercent < 1)
-        playedPercent = 1;
-    $('#progressbar').css('width', playedPercent+'%').attr("aria-valuenow", playedPercent).text(Math.round(sound.currentTime*100)/100 + "s");
-}
 
 function editShow(index) {
     $('#word').val(test_data.words[index][WORD]);
@@ -73,28 +73,6 @@ function addWord() {
     updateWord();
 }
 
-function playSound() {
-    if (sound.currentSrc == "") {
-        sound.src = '/short.wav';
-        sound.ontimeupdate = function(){
-            updateWord();
-            updateProgressBar();
-        };
-    }
-
-    if (sound.paused) {
-        sound.play();
-        document.querySelector('#play').innerHTML = "Pause";
-    } else {
-        sound.pause();
-        document.querySelector('#play').innerHTML = "Play";
-    }
-}
-
-function stop() {
-    sound.pause()
-    sound.currentTime = 0;
-}
 
 function gentranscriptHTML() {
     var html = [];
@@ -123,7 +101,7 @@ function showTranscript() {
 function getWordIndexByTime(currentTime) {
     var result = []
     test_data.words.forEach(function(val, index){
-        if (val[END_TIME] <= currentTime && val[START_TIME] >= currentTime) {
+        if (val[END_TIME] >= currentTime && val[START_TIME] <= currentTime) {
             result.push(index);
         }
     });

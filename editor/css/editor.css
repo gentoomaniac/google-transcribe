@@ -12,15 +12,22 @@ div#player-jumbo {
   text-align: center;
 }
 
-div.player {
-  align-self: center;
+div#player {
+  width: 800px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, 0%);
 }
 
-div#edit-word {
+div#editWord {
   position: absolute;
   max-width: 800px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   visibility: hidden;
+}
+
+input#current-time {
+  width: 100%;
 }

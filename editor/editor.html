@@ -8,29 +8,15 @@
     <body>
         <div class="container">
             <div class="jumbotron" id="player-jumbo">
-                <p class="lead">Edit your transcript here.</p>
-                <div id="player" class="card border-primary mb-3" style="max-width: 20rem;">
-                    <div class="card-header">Player</div>
-                    <div class="card-body">
-                        <p>
-                            <!--
-                            <div class="form-group">
-                                <fieldset>
-                                    <input class="form-control" id="timeInput" type="text" placeholder="" readonly="">
-                                </fieldset>
-                            </div>
-                            -->
-                            <div class="progress"><div id="progressbar" class="progress-bar bg-success" role="progressbar" style="width: 1%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>
-                        </p>
-                        <p>
-                            <button id="play" type="button" class="btn btn-secondary">Play</button>
-                            <button id="stop" type="button" class="btn btn-secondary">Stop</button>
-                        </p>
-                    </div>
-                </div>
+                <p>
+                    <audio id="my-audio" preload="metadata" controls>
+                        <source src="/short.mp3" type="audio/mp3">
+                    </audio>
+                </p>
                 <p><div id="transcript"></div></p>
             </div>
         </div>
+
 
         <div class="modal edit-word">
             <div class="modal-dialog" role="document">
