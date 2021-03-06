@@ -62,18 +62,6 @@ function editClose() {
     $('.edit-word').hide();
 }
 
-function saveWord() {
-    var lastIndex = lastWords.length-1;
-    test_data.words[lastWords[lastIndex]][WORD] = $('#word').val();
-    test_data.words[lastWords[lastIndex]][START_TIME] = $('#start-time').val();
-    test_data.words[lastWords[lastIndex]][END_TIME] = $('#end-time').val();
-    $('.edit-word').hide();
-    var wordId = $('#word-id').val();
-    $('#w_'+wordId).text(test_data.words[lastWords[lastIndex]][WORD])
-    updateWord();
-
-}
-
 function addWord() {
     var newWord = window.prompt("add new word:", "");
     test_data.words.splice(lastWord+1, 0, {'word': newWord, 'start_time': sound.currentTime, 'end_time': null});
@@ -106,20 +94,33 @@ function loadTranscript() {
     });
     $('#transcript').html(innerHTML);
     $('.transcript-row').on("keydown", function(e){
+        var element = $("#"+this.id);
+        var rowId = parseInt(element.attr("row-id"));
+        var tagIndex = element.text().slice(0, getCaretPosition(this)[0]).split(' ').length-1;
+        var wordIndex = test_data.transcript[rowId].start_word + tagIndex
+
         // ToDo: handle keys
         switch (e.key) {
             case " ":
+                var newWord = ["", test_data.words[wordIndex][END_TIME], test_data.words[wordIndex][END_TIME]+0.1];
+                test_data.words.splice(wordIndex+1, 0, newWord);
+                test_data.transcript[rowId].end_word++;
+                if (rowId+1 < test_data.transcript.length)
+                    test_data.transcript[rowId+1].start_word++;
+                var newRow = getTranscriptRow(test_data.transcript[rowId].start_word, test_data.transcript[rowId].end_word);
+                element.html("<p>" + newRow.join(' ') + "</p>");
+                return false;
             case "Tab":
             case "Enter":
                 return false;
         }
     });
-    $('.transcript-row').on("input", function(){
+    $('.transcript-row').on("input", function(e){
         var element = $("#"+this.id);
         var tags = element.text().split(' ')
         var tagIndex = element.text().slice(0, getCaretPosition(this)[0]).split(' ').length-1;
         var wordIndex = test_data.transcript[element.attr("row-id")].start_word + tagIndex
-        test_data.words[wordIndex][WORD] = tags[tagIndex];
+        test_data.words[wordIndex][WORD] = tags[tagIndex].trim();
     });
 }
 
