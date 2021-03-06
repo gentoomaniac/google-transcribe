@@ -13,15 +13,13 @@ var transcriptFile;
 
 $(document).ready(function(){
     $("#files").on("change", function(){
-        console.log(this.value + ".json")
-        $.getJSON("/" + this.value + ".json", function(json) {
-            test_data = json;
-            showTranscript();
+        $.getJSON("/" + this.value + ".json", function(data) {
+            test_data = data;
+            loadTranscript();
         });
         sound.prop("src", "/" + this.value + ".mp3");
     });
 
-    $('#add_word').click(addWord);
     sound.on("timeupdate", function(){
         updateWord(sound.prop("currentTime"));
     });
@@ -41,9 +39,12 @@ $(document).ready(function(){
 
 function updateWord(currentTime) {
     var index = getWordIndexByTime(currentTime)[0];
+
+    $('#w_'+index).removeClass('badge-secondary');
+    $('#w_'+index).addClass('badge-success');
     if (index != lastWord){
-        $('#w_'+index).removeClass('badge-secondary');
-        $('#w_'+index).addClass('badge-success');
+        $('#w_'+lastWord).removeClass('badge-success');
+        $('#w_'+lastWord).addClass('badge-secondary');
         lastWord = index;
     }
 }
@@ -79,22 +80,24 @@ function addWord() {
     updateWord();
 }
 
+function getTranscriptRow(start, end) {
+    words = test_data.words.slice(start, end);
+    var row = [];
+    words.forEach(function(val, index){
+        row.push('<span id="w_' + (start+index) + '" class="badge badge-secondary word" word-id="' + (start+index) + '">' + val[WORD] + '</span>');
+    });
+    return row;
+}
 
 function genTranscriptHTML() {
     var html = [];
     test_data.transcript.forEach(function(line){
-        words = test_data.words.slice(line.start_word, line.end_word+1)
-
-        var row = [];
-        words.forEach(function(val, index){
-            row.push('<span id="w_' + (line.start_word+index) + '" class="badge badge-secondary" onClick="editShow(' + (line.start_word+index) + ')\">' + val[WORD] + '</span>');
-        });
-        html.push(row);
+        html.push(getTranscriptRow(line.start_word, line.end_word+1));
     });
     return html;
 }
 
-function showTranscript() {
+function loadTranscript() {
     var html = genTranscriptHTML();
 
     var innerHTML = "";
@@ -102,6 +105,9 @@ function showTranscript() {
         innerHTML = innerHTML + '<p id="row_' + index + '">' + val.join(' ') + '</p>';
     });
     $('#transcript').html(innerHTML);
+    $('.word').click(function(){
+        editShow($(this).attr('word-id'))
+    });
 }
 
 function getWordIndexByTime(currentTime) {

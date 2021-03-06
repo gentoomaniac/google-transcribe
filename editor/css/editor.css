@@ -11,14 +11,13 @@ div.container {
 div#player-jumbo {
   text-align: center;
 }
-
-div#editWord {
+.edit-word {
   position: absolute;
   max-width: 800px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  visibility: hidden;
+  display: none;
 }
 
 input#current-time {
@@ -40,4 +39,16 @@ input#current-time {
 
 #files {
   width: 100%;
+}
+
+.edit-label {
+  width: 40px;
+}
+
+#danger-buttons {
+  float: right;
+}
+
+#edit-buttons {
+  float: left;
 }
