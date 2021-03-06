@@ -46,15 +46,6 @@ $(document).ready(function(){
                         sound.trigger('pause');
                 }
                 break;
-
-            case 'ArrowLeft':
-                if (e.ctrlKey)
-                    sound.prop('currentTime', sound.prop('currentTime')-1);
-                break;
-            case 'ArrowRight':
-                if (e.ctrlKey)
-                    sound.prop('currentTime', sound.prop('currentTime')+1);
-                break;
         }
     });
 });
@@ -121,6 +112,16 @@ function loadTranscript() {
 
             case "Tab":
                 return false;
+
+            // ToDo: consider curser position in the word
+            case 'ArrowLeft':
+                if (e.ctrlKey)
+                    sound.prop('currentTime', test_data.words[wordIndex][START_TIME]);
+                break;
+            case 'ArrowRight':
+                if (e.ctrlKey)
+                    sound.prop('currentTime', test_data.words[wordIndex][START_TIME]);
+                break;
         }
     });
     $('.transcript-row').on("input", function(e){
