@@ -150,6 +150,11 @@ function loadTranscript() {
         test_data.words[wordIndex][WORD] = tags[tagIndex].trim();
     });
 
+    // prevent pasting text as this would break everything
+    $('.transcript-row').on("paste", function(e){
+        e.preventDefault();
+    });
+
     $('.word').on("dblclick", function(){
         sound.prop('currentTime', test_data.words[this.getAttribute("word-id")][START_TIME]);
     });
