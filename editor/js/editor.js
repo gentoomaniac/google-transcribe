@@ -69,19 +69,6 @@ function updateWord(currentTime) {
     }
 }
 
-
-function editShow(index) {
-    $('#word').val(test_data.words[index][WORD]);
-    $('#start-time').val(test_data.words[index][START_TIME]);
-    $('#end-time').val(test_data.words[index][END_TIME]);
-    $('#word-id').val(index);
-    $('.edit-word').show();
-}
-
-function editClose() {
-    $('.edit-word').hide();
-}
-
 function addWord() {
     var newWord = window.prompt("add new word:", "");
     test_data.words.splice(lastWord+1, 0, {'word': newWord, 'start_time': sound.currentTime, 'end_time': null});
