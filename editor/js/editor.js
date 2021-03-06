@@ -37,11 +37,24 @@ $(document).ready(function(){
     });
     $(document).on('keyup', function(e){
         switch(e.key){
+            // ctrl + p for play/pause
             case 'p':
-                if (sound.prop('paused'))
-                    sound.trigger('play');
-                else
-                    sound.trigger('pause');
+                if (e.altKey) {
+                    if (sound.prop('paused'))
+                        sound.trigger('play');
+                    else
+                        sound.trigger('pause');
+                }
+                break;
+
+            case 'ArrowLeft':
+                if (e.ctrlKey)
+                    sound.prop('currentTime', sound.prop('currentTime')-1);
+                break;
+            case 'ArrowRight':
+                if (e.ctrlKey)
+                    sound.prop('currentTime', sound.prop('currentTime')+1);
+                break;
         }
     });
 });
@@ -135,10 +148,6 @@ function loadTranscript() {
         var tagIndex = element.text().slice(0, getCaretPosition(this)[0]).split(' ').length-1;
         var wordIndex = test_data.transcript[element.attr("row-id")].start_word + tagIndex
         test_data.words[wordIndex][WORD] = tags[tagIndex].trim();
-    });
-    // in editmode we don't want keybinds to work
-    $('.transcript-row').on('keyup', function(e){
-        e.stopPropagation();
     });
 
     $('.word').on("dblclick", function(){
