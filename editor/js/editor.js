@@ -35,6 +35,15 @@ $(document).ready(function(){
         if (!isPaused)
             sound.trigger("play");
     });
+    $(document).on('keyup', function(e){
+        switch(e.key){
+            case 'p':
+                if (sound.prop('paused'))
+                    sound.trigger('play');
+                else
+                    sound.trigger('pause');
+        }
+    });
 });
 
 function updateWord(currentTime) {
@@ -88,7 +97,7 @@ function loadTranscript() {
 
     var innerHTML = "";
     html.forEach(function(val, index) {
-        innerHTML = innerHTML + '<div id="row_' + index + '" class="transcript-row" row-id="' + index + '" contenteditable="true"><p>' + val.join(' ') + '</p></div>';
+        innerHTML = innerHTML + '<div id="row_' + index + '" class="transcript-row transcript-row" row-id="' + index + '" contenteditable="true"><p>' + val.join(' ') + '</p></div>';
     });
     $('#transcript').html(innerHTML);
     $('.transcript-row').on("keydown", function(e){
@@ -127,6 +136,14 @@ function loadTranscript() {
         var wordIndex = test_data.transcript[element.attr("row-id")].start_word + tagIndex
         test_data.words[wordIndex][WORD] = tags[tagIndex].trim();
     });
+    // in editmode we don't want keybinds to work
+    $('.transcript-row').on('keyup', function(e){
+        e.stopPropagation();
+    });
+
+    $('.word').on("dblclick", function(){
+        sound.prop('currentTime', test_data.words[this.getAttribute("word-id")][START_TIME]);
+    });
 }
 
 function getWordIndexByTime(currentTime) {
@@ -155,6 +172,15 @@ function download(filename, text) {
 
 function exportJson() {
     download("transcript.json", JSON.stringify(test_data))
+}
+
+function exportTranscript() {
+    var text = "";
+    loadTranscript();
+    $('.transcript-row').each(function(){
+        text += $("#"+this.id).text() + '\n';
+    })
+    download("transcript.txt", text);
 }
 
 
