@@ -69,12 +69,6 @@ function updateWord(currentTime) {
     }
 }
 
-function addWord() {
-    var newWord = window.prompt("add new word:", "");
-    test_data.words.splice(lastWord+1, 0, {'word': newWord, 'start_time': sound.currentTime, 'end_time': null});
-    updateWord();
-}
-
 function getTranscriptRow(start, end) {
     words = test_data.words.slice(start, end);
     var row = [];
