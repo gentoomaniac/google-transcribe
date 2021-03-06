@@ -40,11 +40,9 @@ $(document).ready(function(){
 function updateWord(currentTime) {
     var index = getWordIndexByTime(currentTime)[0];
 
-    $('#w_'+index).removeClass('badge-secondary');
-    $('#w_'+index).addClass('badge-success');
+    $('#w_'+index).addClass('badge badge-success');
     if (index != lastWord){
-        $('#w_'+lastWord).removeClass('badge-success');
-        $('#w_'+lastWord).addClass('badge-secondary');
+        $('#w_'+lastWord).removeClass('badge badge-success');
         lastWord = index;
     }
 }
@@ -72,7 +70,7 @@ function getTranscriptRow(start, end) {
     words = test_data.words.slice(start, end);
     var row = [];
     words.forEach(function(val, index){
-        row.push('<span id="w_' + (start+index) + '" class="badge badge-secondary word" word-id="' + (start+index) + '">' + val[WORD] + '</span>');
+        row.push('<span id="w_' + (start+index) + '" class="word" word-id="' + (start+index) + '">' + val[WORD] + '</span>');
     });
     return row;
 }
@@ -102,7 +100,7 @@ function loadTranscript() {
         // ToDo: handle keys
         switch (e.key) {
             case " ":
-                var newWord = ["", test_data.words[wordIndex][END_TIME], test_data.words[wordIndex][END_TIME]+0.1];
+                var newWord = ["&nbsp;", test_data.words[wordIndex][END_TIME], test_data.words[wordIndex][END_TIME]+0.1];
                 test_data.words.splice(wordIndex+1, 0, newWord);
                 test_data.transcript[rowId].end_word++;
                 if (rowId+1 < test_data.transcript.length)
@@ -110,8 +108,15 @@ function loadTranscript() {
                 var newRow = getTranscriptRow(test_data.transcript[rowId].start_word, test_data.transcript[rowId].end_word);
                 element.html("<p>" + newRow.join(' ') + "</p>");
                 return false;
-            case "Tab":
+
             case "Enter":
+                var newRow = {'confidence': 0, 'start_word': wordIndex+1, 'end_word': test_data.transcript[rowId].end_word}
+                test_data.transcript[rowId].end_word = wordIndex;
+                test_data.transcript.splice(rowId+1, 0, newRow);
+                loadTranscript();
+                return false;
+
+            case "Tab":
                 return false;
         }
     });

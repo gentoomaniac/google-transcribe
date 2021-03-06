@@ -5,7 +5,7 @@
 div.container {
   width: 80%;
   align-self: center;
-  padding-top: 20px;
+  padding-top: 100px;
 }
 
 div#player-jumbo {
@@ -59,9 +59,4 @@ input#current-time {
   left: 50%;
   top: 2rem;
   transform: translate(-50%, 0%);
-}
-
-span.word:before {
-  content: "\200D";
-  display: inline;
 }
