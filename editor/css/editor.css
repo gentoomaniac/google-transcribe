@@ -12,7 +12,7 @@ div#player-jumbo {
   text-align: center;
 }
 .edit-word {
-  position: absolute;
+  position: fixed;
   max-width: 800px;
   top: 50%;
   left: 50%;
@@ -51,4 +51,12 @@ input#current-time {
 
 #edit-buttons {
   float: left;
+}
+
+#playerframe {
+  position: fixed;
+  width: 70%;
+  left: 50%;
+  top: 2rem;
+  transform: translate(-50%, 0%);
 }
