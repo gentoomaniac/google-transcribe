@@ -11,6 +11,8 @@ var lastWord = 0;
 
 var transcriptFile;
 
+var keyDown = false;
+
 $(document).ready(function(){
     $("#files").on("change", function(){
         $.getJSON("/" + this.value + ".json", function(data) {
@@ -85,11 +87,42 @@ function loadTranscript() {
         innerHTML = innerHTML + '<div id="row_' + index + '" class="transcript-row transcript-row" row-id="' + index + '" contenteditable="true"><p>' + val.join(' ') + '</p></div>';
     });
     $('#transcript').html(innerHTML);
+    // prevent repeated keystrokes except from the following
     $('.transcript-row').on("keydown", function(e){
+        if(keyDown)
+            return false;
+        switch (e.key){
+            case 'Alt':
+            case 'AltGraph':
+            case 'CapsLock':
+            case 'Control':
+            case 'Shift':
+            case 'Super':
+            case 'ArrowDown':
+            case 'ArrowLeft':
+            case 'ArrowRight':
+            case 'ArrowUp':
+            case 'PageDown':
+            case 'PageUp':
+            case 'Backspace':
+            case 'Delete':
+                break;
+
+            default:
+                keyDown = true;
+        }
+    });
+    $('.transcript-row').on("keyup", function(e){
         var element = $("#"+this.id);
+        var caretPosition = getCaretPosition(this)[0];
         var rowId = parseInt(element.attr("row-id"));
-        var tagIndex = element.text().slice(0, getCaretPosition(this)[0]).split(' ').length-1;
+        var tagIndex = element.text().slice(0, caretPosition+1).split(' ').length-1;
         var wordIndex = test_data.transcript[rowId].start_word + tagIndex
+        var tags = element.text().slice(0, caretPosition).split(' ');
+        var caretInWord = tags[tags.length-1].length;
+        console.log(tags)
+        console.log(tags[tags.length-1])
+        console.log({'row': rowId, 'tagIndex': tagIndex, 'wordIndex': wordIndex, 'caretPosition': caretPosition,'caretInWord': caretInWord})
 
         // ToDo: handle keys
         switch (e.key) {
@@ -123,6 +156,7 @@ function loadTranscript() {
                     sound.prop('currentTime', test_data.words[wordIndex][START_TIME]);
                 break;
         }
+        keyDown = false;
     });
     $('.transcript-row').on("input", function(e){
         var element = $("#"+this.id);
