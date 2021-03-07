@@ -116,18 +116,17 @@ function loadTranscript() {
         var element = $("#"+this.id);
         var caretPosition = getCaretPosition(this)[0];
         var rowId = parseInt(element.attr("row-id"));
-        var tagIndex = element.text().slice(0, caretPosition+1).split(' ').length-1;
-        var wordIndex = test_data.transcript[rowId].start_word + tagIndex
+        var tagIndex = element.text().slice(0, caretPosition).split(' ').length-1;
+        var wordIndex = test_data.transcript[rowId].start_word + tagIndex;
+        var word = test_data.words[wordIndex];
         var tags = element.text().slice(0, caretPosition).split(' ');
         var caretInWord = tags[tags.length-1].length;
-        console.log(tags)
-        console.log(tags[tags.length-1])
-        console.log({'row': rowId, 'tagIndex': tagIndex, 'wordIndex': wordIndex, 'caretPosition': caretPosition,'caretInWord': caretInWord})
+        //console.log({'row': rowId, 'tagIndex': tagIndex, 'wordIndex': wordIndex, 'caretPosition': caretPosition,'caretInWord': caretInWord})
 
         // ToDo: handle keys
         switch (e.key) {
             case " ":
-                var newWord = ["&nbsp;", test_data.words[wordIndex][END_TIME], test_data.words[wordIndex][END_TIME]+0.1];
+                var newWord = ["&nbsp;", word[END_TIME], word[END_TIME]+0.1];
                 test_data.words.splice(wordIndex+1, 0, newWord);
                 test_data.transcript[rowId].end_word++;
                 if (rowId+1 < test_data.transcript.length)
@@ -148,12 +147,12 @@ function loadTranscript() {
 
             // ToDo: consider curser position in the word
             case 'ArrowLeft':
-                if (e.ctrlKey)
-                    sound.prop('currentTime', test_data.words[wordIndex][START_TIME]);
-                break;
             case 'ArrowRight':
                 if (e.ctrlKey)
-                    sound.prop('currentTime', test_data.words[wordIndex][START_TIME]);
+                    if (caretInWord == 0)
+                        sound.prop('currentTime', word[START_TIME]);
+                    else
+                        sound.prop('currentTime', word[END_TIME]);
                 break;
         }
         keyDown = false;
@@ -163,6 +162,7 @@ function loadTranscript() {
         var tags = element.text().split(' ')
         var tagIndex = element.text().slice(0, getCaretPosition(this)[0]).split(' ').length-1;
         var wordIndex = test_data.transcript[element.attr("row-id")].start_word + tagIndex
+
         test_data.words[wordIndex][WORD] = tags[tagIndex].trim();
     });
 
