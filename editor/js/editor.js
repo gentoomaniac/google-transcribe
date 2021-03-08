@@ -55,9 +55,11 @@ $(document).ready(function(){
 function updateWord(currentTime) {
     var index = getWordIndexByTime(currentTime)[0];
 
-    $('#w_'+index).addClass('badge badge-success');
+    $('#w_'+index).removeClass('badge-secondary');
+    $('#w_'+index).addClass('badge-success');
     if (index != lastWord){
-        $('#w_'+lastWord).removeClass('badge badge-success');
+        $('#w_'+lastWord).removeClass('badge-success');
+        $('#w_'+index).addClass('badge-secondary');
         lastWord = index;
     }
 }
@@ -66,7 +68,7 @@ function getTranscriptRow(start, end) {
     words = test_data.words.slice(start, end);
     var row = [];
     words.forEach(function(val, index){
-        row.push('<span id="w_' + (start+index) + '" class="word" word-id="' + (start+index) + '">' + val[WORD] + '</span>');
+        row.push('<span id="w_' + (start+index) + '" class="badge badge-secondary word" word-id="' + (start+index) + '">' + val[WORD] + '</span>');
     });
     return row;
 }
@@ -112,7 +114,7 @@ function loadTranscript() {
                 keyDown = true;
         }
     });
-    $('.transcript-row').on("keyup", function(e){
+    $('.transcript-row').on("keydown", function(e){
         var element = $("#"+this.id);
         var caretPosition = getCaretPosition(this)[0];
         var rowId = parseInt(element.attr("row-id"));
@@ -126,13 +128,22 @@ function loadTranscript() {
         // ToDo: handle keys
         switch (e.key) {
             case " ":
-                var newWord = ["&nbsp;", word[END_TIME], word[END_TIME]+0.1];
-                test_data.words.splice(wordIndex+1, 0, newWord);
-                test_data.transcript[rowId].end_word++;
-                if (rowId+1 < test_data.transcript.length)
-                    test_data.transcript[rowId+1].start_word++;
-                var newRow = getTranscriptRow(test_data.transcript[rowId].start_word, test_data.transcript[rowId].end_word);
-                element.html("<p>" + newRow.join(' ') + "</p>");
+                console.log(caretInWord)
+                console.log(word[WORD].length)
+                if (caretInWord == word[WORD].length) {
+                    console.log('creating new word')
+                    var newWord = ["newWord", word[END_TIME], word[END_TIME]+0.1];
+                    test_data.words.splice(wordIndex+1, 0, newWord);
+                    test_data.transcript[rowId].end_word++;
+                    if (rowId+1 < test_data.transcript.length)
+                        test_data.transcript[rowId+1].start_word++;
+                    var newRow = getTranscriptRow(test_data.transcript[rowId].start_word, test_data.transcript[rowId].end_word);
+                    element.html("<p>" + newRow.join(' ') + "</p>");
+                    console.log(test_data)
+                    console.log('w_'+(wordIndex+1))
+                    setCaret(document.getElementById('w_'+(wordIndex+1)), 0);
+                }
+                keyDown = false;
                 return false;
 
             case "Enter":
@@ -263,4 +274,16 @@ var cum_length = [0, 0];
     if(cum_length[0] <= cum_length[1])
         return cum_length;
     return [cum_length[1], cum_length[0]];
+}
+
+function setCaret(element, position) {
+    var rangeobj = document.createRange();
+    var selectobj = window.getSelection();
+
+    rangeobj.setStart(element, position);
+    rangeobj.collapse(true);
+
+    selectobj.removeAllRanges();
+
+    selectobj.addRange(rangeobj);
 }
