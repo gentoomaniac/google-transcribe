@@ -86,7 +86,7 @@ function loadTranscript() {
 
     var innerHTML = "";
     html.forEach(function(val, index) {
-        innerHTML = innerHTML + '<div id="row_' + index + '" class="transcript-row transcript-row" row-id="' + index + '" contenteditable="true"><p>' + val.join(' ') + '</p></div>';
+        innerHTML = innerHTML + '<p><div id="row_' + index + '" class="transcript-row transcript-row" row-id="' + index + '">' + val.join(' ') + '</div></p>';
     });
     $('#transcript').html(innerHTML);
     // prevent repeated keystrokes except from the following
@@ -138,7 +138,7 @@ function loadTranscript() {
                     if (rowId+1 < test_data.transcript.length)
                         test_data.transcript[rowId+1].start_word++;
                     var newRow = getTranscriptRow(test_data.transcript[rowId].start_word, test_data.transcript[rowId].end_word);
-                    element.html("<p>" + newRow.join(' ') + "</p>");
+                    element.html(newRow.join(' '));
                     console.log(test_data)
                     console.log('w_'+(wordIndex+1))
                     setCaret(document.getElementById('w_'+(wordIndex+1)), 0);
@@ -168,19 +168,34 @@ function loadTranscript() {
         }
         keyDown = false;
     });
-    $('.transcript-row').on("input", function(e){
+    $('.word').on("input", function(e){
         var element = $("#"+this.id);
-        var tags = element.text().split(' ')
-        var tagIndex = element.text().slice(0, getCaretPosition(this)[0]).split(' ').length-1;
-        var wordIndex = test_data.transcript[element.attr("row-id")].start_word + tagIndex
+        var wordId = parseInt(element.attr('word-id'));
+        var rowId = parseInt(element.parent().attr('row-id'));
 
-        test_data.words[wordIndex][WORD] = tags[tagIndex].trim();
+        console.log(rowId)
+        console.log(element.parent())
+
+        // if a word is empty, remove it from the list of words
+        if (element.text() == ''){
+            test_data.words.splice(wordId, 1);
+            test_data.transcript[rowId].end_word--;
+            // empty row, remove row
+            if (test_data.transcript[rowId].end_word - test_data.transcript[rowId].start_word < 0) {
+                test_data.transcript.splice(rowId, 1);
+            }
+        } else {
+            test_data.words[wordId][WORD] = element.text();
+        }
+        console.log(test_data.words[wordId][WORD])
     });
 
     // prevent pasting text as this would break everything
     $('.transcript-row').on("paste", function(e){
         e.preventDefault();
     });
+
+    $('.word').attr('contenteditable','true');
 
     $('.word').on("dblclick", function(){
         sound.prop('currentTime', test_data.words[this.getAttribute("word-id")][START_TIME]);
