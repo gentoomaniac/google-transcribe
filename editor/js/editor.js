@@ -81,69 +81,55 @@ function genTranscriptHTML() {
     return html;
 }
 
-function loadTranscript() {
-    var html = genTranscriptHTML();
+function setWordHandlers() {
+    $('.word').attr('contenteditable','true');
 
-    var innerHTML = "";
-    html.forEach(function(val, index) {
-        innerHTML = innerHTML + '<p><div id="row_' + index + '" class="transcript-row transcript-row" row-id="' + index + '">' + val.join(' ') + '</div></p>';
+    $('.word').on("dblclick", function(){
+        sound.prop('currentTime', test_data.words[this.getAttribute("word-id")][START_TIME]);
     });
-    $('#transcript').html(innerHTML);
-    // prevent repeated keystrokes except from the following
-    $('.transcript-row').on("keydown", function(e){
-        if(keyDown)
-            return false;
-        switch (e.key){
-            case 'Alt':
-            case 'AltGraph':
-            case 'CapsLock':
-            case 'Control':
-            case 'Shift':
-            case 'Super':
-            case 'ArrowDown':
-            case 'ArrowLeft':
-            case 'ArrowRight':
-            case 'ArrowUp':
-            case 'PageDown':
-            case 'PageUp':
-            case 'Backspace':
-            case 'Delete':
-                break;
-
-            default:
-                keyDown = true;
-        }
-    });
-    $('.transcript-row').on("keydown", function(e){
+    $('.word').on("input", function(e){
         var element = $("#"+this.id);
+        var wordId = parseInt(element.attr('word-id'));
+        var rowId = parseInt(element.parent().attr('row-id'));
+
+        // if a word is empty, remove it from the list of words
+        if (element.text() == ''){
+            test_data.words.splice(wordId, 1);
+            test_data.transcript[rowId].end_word--;
+            // empty row, remove row
+            if (test_data.transcript[rowId].end_word - test_data.transcript[rowId].start_word < 0) {
+                test_data.transcript.splice(rowId, 1);
+            }
+        } else {
+            test_data.words[wordId][WORD] = element.text().replace('&ZeroWidthSpace;', '');
+        }
+        console.log(test_data.words[wordId][WORD])
+    });
+    $('.word').on("keydown", function(e){
+        var element = $("#"+this.id);
+        var row = element.parent()
         var caretPosition = getCaretPosition(this)[0];
-        var rowId = parseInt(element.attr("row-id"));
-        var tagIndex = element.text().slice(0, caretPosition).split(' ').length-1;
-        var wordIndex = test_data.transcript[rowId].start_word + tagIndex;
-        var word = test_data.words[wordIndex];
-        var tags = element.text().slice(0, caretPosition).split(' ');
-        var caretInWord = tags[tags.length-1].length;
-        //console.log({'row': rowId, 'tagIndex': tagIndex, 'wordIndex': wordIndex, 'caretPosition': caretPosition,'caretInWord': caretInWord})
+        var wordId = parseInt(element.attr('word-id'));
+        var rowId = parseInt(row.attr('row-id'));
+        var word = test_data.words[wordId];
+        console.log({'row': rowId, 'wordId': wordId, 'word': word, 'caretPosition': caretPosition})
 
         // ToDo: handle keys
         switch (e.key) {
             case " ":
-                console.log(caretInWord)
-                console.log(word[WORD].length)
-                if (caretInWord == word[WORD].length) {
-                    console.log('creating new word')
-                    var newWord = ["newWord", word[END_TIME], word[END_TIME]+0.1];
-                    test_data.words.splice(wordIndex+1, 0, newWord);
+                if (caretPosition == word[WORD].length) {
+                    var newWord = ["&ZeroWidthSpace;", word[END_TIME], word[END_TIME]+0.1];
+                    test_data.words.splice(wordId+1, 0, newWord);
                     test_data.transcript[rowId].end_word++;
                     if (rowId+1 < test_data.transcript.length)
                         test_data.transcript[rowId+1].start_word++;
                     var newRow = getTranscriptRow(test_data.transcript[rowId].start_word, test_data.transcript[rowId].end_word);
-                    element.html(newRow.join(' '));
-                    console.log(test_data)
-                    console.log('w_'+(wordIndex+1))
-                    setCaret(document.getElementById('w_'+(wordIndex+1)), 0);
+                    row.html(newRow.join(' '));
+                    setWordHandlers();
+                    $('#w_'+(wordId+1)).focus();
                 }
                 keyDown = false;
+                console.log(test_data)
                 return false;
 
             case "Enter":
@@ -168,38 +154,17 @@ function loadTranscript() {
         }
         keyDown = false;
     });
-    $('.word').on("input", function(e){
-        var element = $("#"+this.id);
-        var wordId = parseInt(element.attr('word-id'));
-        var rowId = parseInt(element.parent().attr('row-id'));
+}
 
-        console.log(rowId)
-        console.log(element.parent())
+function loadTranscript() {
+    var html = genTranscriptHTML();
 
-        // if a word is empty, remove it from the list of words
-        if (element.text() == ''){
-            test_data.words.splice(wordId, 1);
-            test_data.transcript[rowId].end_word--;
-            // empty row, remove row
-            if (test_data.transcript[rowId].end_word - test_data.transcript[rowId].start_word < 0) {
-                test_data.transcript.splice(rowId, 1);
-            }
-        } else {
-            test_data.words[wordId][WORD] = element.text();
-        }
-        console.log(test_data.words[wordId][WORD])
+    var innerHTML;
+    html.forEach(function(val, index) {
+        innerHTML = innerHTML + '<p><div id="row_' + index + '" class="transcript-row transcript-row" row-id="' + index + '">' + val.join(' ') + '</div></p>';
     });
-
-    // prevent pasting text as this would break everything
-    $('.transcript-row').on("paste", function(e){
-        e.preventDefault();
-    });
-
-    $('.word').attr('contenteditable','true');
-
-    $('.word').on("dblclick", function(){
-        sound.prop('currentTime', test_data.words[this.getAttribute("word-id")][START_TIME]);
-    });
+    $('#transcript').html(innerHTML);
+    setWordHandlers();
 }
 
 function getWordIndexByTime(currentTime) {
